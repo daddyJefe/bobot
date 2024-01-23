@@ -3,13 +3,17 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
-
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.util.sendable.SendableRegistry;
+import edu.wpi.first.wpilibj.BuiltInAccelerometer;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -18,12 +22,27 @@ import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
  * directory.
  */
 public class Robot extends TimedRobot {
+//yo
+BuiltInAccelerometer accelerometer = new BuiltInAccelerometer();
+
+//no
+
   private final PWMSparkMax m_leftDrive = new PWMSparkMax(0);
   private final PWMSparkMax m_rightDrive = new PWMSparkMax(1);
   private final DifferentialDrive m_robotDrive =
       new DifferentialDrive(m_leftDrive::set, m_rightDrive::set);
   private final XboxController m_controller = new XboxController(0);
   private final Timer m_timer = new Timer();
+
+//stupid code goes here
+double prevXAccel = 0.0;
+double prevYAccel = 0.0;
+// navX MXP using SPI
+ahrs gyro = new AHRS(SPI.Port.kMXP);
+LinearFilter xAccelFilter = LinearFilter.movingAverage(10);
+double filteredXAccel = 0.0;
+
+//delete this if it is tweaking
 
   public Robot() {
     SendableRegistry.addChild(m_robotDrive, m_leftDrive);
@@ -58,21 +77,34 @@ public class Robot extends TimedRobot {
     } else {
       m_robotDrive.stopMotor(); // stop robot
     }
+
+   
   }
 
   /** This function is called once each time the robot enters teleoperated mode. */
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+    
+  }
 
   /** This function is called periodically during teleoperated mode. */
   @Override
   public void teleopPeriodic() {
+ 
+    double filteredXAccel = xAccelFilter.calculate(accelerometer.getX());
+    SmartDashboard.putNumber(  "IMU_Pitch", filteredXAccel);
+
     System.out.println("X pressed? "+(m_controller.getXButtonPressed()));
-    m_robotDrive.arcadeDrive(-m_controller.getLeftY(), -m_controller.getRightX());
+    
+    m_robotDrive.arcadeDrive(-m_controller.getLeftY(), m_controller.getRightX());
+    
+   
   }
+// balls
 
 
 
+// balls
   /** This function is called once each time the robot enters test mode. */
   @Override
   public void testInit() {}
