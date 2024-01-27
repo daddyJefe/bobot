@@ -27,9 +27,13 @@ BuiltInAccelerometer accelerometer = new BuiltInAccelerometer();
 
 //no
 
-  private final PWMSparkMax m_leftDrive = new PWMSparkMax(0);
-  private final PWMSparkMax m_rightDrive = new PWMSparkMax(1);
+  private final PWMSparkMax m_leftDrive = new PWMSparkMax(3);
+  private final PWMSparkMax m_rightDrive = new PWMSparkMax(4);
   private final DifferentialDrive m_robotDrive =
+
+  private final PWMSparkMax m_leftDrive2 = new PWMSparkMax(1);
+  private final PWMSparkMax m_rightDrive2 = new PWMSparkMax(2);
+  private final DifferentialDrive m_robotDrive2 =
       new DifferentialDrive(m_leftDrive::set, m_rightDrive::set);
   private final XboxController m_controller = new XboxController(0);
   private final Timer m_timer = new Timer();
@@ -38,7 +42,6 @@ BuiltInAccelerometer accelerometer = new BuiltInAccelerometer();
 double prevXAccel = 0.0;
 double prevYAccel = 0.0;
 // navX MXP using SPI
-ahrs gyro = new AHRS(SPI.Port.kMXP);
 LinearFilter xAccelFilter = LinearFilter.movingAverage(10);
 double filteredXAccel = 0.0;
 
@@ -97,14 +100,10 @@ double filteredXAccel = 0.0;
     System.out.println("X pressed? "+(m_controller.getXButtonPressed()));
     
     m_robotDrive.arcadeDrive(-m_controller.getLeftY(), m_controller.getRightX());
+    m_robotDrive2.arcadeDrive(-m_controller.getLeftY(), m_controller.getRightX());
     
    
   }
-// balls
-
-
-
-// balls
   /** This function is called once each time the robot enters test mode. */
   @Override
   public void testInit() {}
