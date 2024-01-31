@@ -6,6 +6,7 @@ package frc.robot;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -16,6 +17,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
  //private final XboxController m_controller = new XboxController(0);  
 import com.revrobotics.CANSparkMax;
+import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import com.revrobotics.RelativeEncoder;
@@ -27,6 +29,12 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
  * directory.
  */
 public class Robot extends TimedRobot {
+
+           
+           AHRS ahrs = new AHRS(SPI.Port.kMXP);
+       
+
+   
   private DifferentialDrive m_myRobot;
   //secondary differentialDrive created to drive the rear wheel systems
  private DifferentialDrive m_rearRobot;
@@ -37,6 +45,9 @@ public class Robot extends TimedRobot {
 private CANSparkMax m_leftRearMotor;
   private CANSparkMax m_rightRearMotor;
 
+//declaring motor encoders for data feedback!
+private RelativeEncoder leftEncoder;
+private RelativeEncoder rightEncoder;
 
 private final XboxController m_controller = new XboxController(0);  
   @Override
@@ -66,13 +77,25 @@ private final XboxController m_controller = new XboxController(0);
 //m_leftMotor.setInverted(true);
     m_myRobot = new DifferentialDrive(m_leftMotor, m_rightMotor);
     m_rearRobot = new DifferentialDrive(m_leftRearMotor, m_rightRearMotor);
-    
+    //this code sets up the encoders with their respective motors
+    leftEncoder = m_leftRearMotor.getEncoder();
+    rightEncoder = m_rightRearMotor.getEncoder();
   }
 
   @Override
   public void teleopPeriodic() {
-   //m_myRobot.arcadeDrive(m_controller.getLeftY(), m_controller.getRightX());
-  //m_rearRobot.arcadeDrive(m_controller.getLeftY(), m_controller.getRightX());
+  m_myRobot.arcadeDrive(m_controller.getLeftY(), m_controller.getRightX()*.6);
+  m_rearRobot.arcadeDrive(m_controller.getLeftY(), m_controller.getRightX()*6);
+
+
+  //this prints the positions of the motors in realtime
+  SmartDashboard.putNumber("Left Encoder", leftEncoder.getPosition());
+  SmartDashboard.putNumber("Right Encoder", rightEncoder.getPosition());
+  SmartDashboard.putBoolean(  "IMU_Connected",        ahrs.isConnected());
+  SmartDashboard.putBoolean(  "IMU_IsCalibrating",    ahrs.isCalibrating());
+  SmartDashboard.putNumber(   "IMU_Yaw",              ahrs.getYaw());
+  SmartDashboard.putNumber(   "IMU_Pitch",            ahrs.getPitch());
+  SmartDashboard.putNumber(   "IMU_Roll",             ahrs.getRoll());
   }
 
 
