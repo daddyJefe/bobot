@@ -3,6 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
+import java.util.concurrent.TimeUnit;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
@@ -17,6 +18,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
  //private final XboxController m_controller = new XboxController(0);  
 import com.revrobotics.CANSparkMax;
+
+import java.util.concurrent.TimeUnit;
+
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
@@ -41,13 +45,18 @@ public class Robot extends TimedRobot {
 
   private CANSparkMax m_leftMotor;
   private CANSparkMax m_rightMotor;
-
+int firing = 0;
+int loading = 0;
 private CANSparkMax m_leftRearMotor;
   private CANSparkMax m_rightRearMotor;
 
 //declaring motor encoders for data feedback!
 private RelativeEncoder leftEncoder;
 private RelativeEncoder rightEncoder;
+
+private CANSparkMax feedWheel;
+private CANSparkMax launchWheel;
+private final Timer m_Timer = new Timer();
 
 private final XboxController m_controller = new XboxController(0);  
   @Override
@@ -69,6 +78,9 @@ private final XboxController m_controller = new XboxController(0);
     m_rightMotor = new CANSparkMax(4, MotorType.kBrushless);
      m_leftRearMotor = new CANSparkMax(2, MotorType.kBrushless);
     m_rightRearMotor = new CANSparkMax(3, MotorType.kBrushless);
+
+    feedWheel = new CANSparkMax(5, MotorType.kBrushless);
+    launchWheel = new CANSparkMax(6, MotorType.kBrushless);
     /**
      * The RestoreFactoryDefaults method can be used to reset the configuration parameters
      * in the SPARK MAX to their factory default state. If no argument is passed, these
@@ -84,9 +96,8 @@ private final XboxController m_controller = new XboxController(0);
 
   @Override
   public void teleopPeriodic() {
-  m_myRobot.arcadeDrive(m_controller.getLeftY(), m_controller.getRightX()*.6);
-  m_rearRobot.arcadeDrive(m_controller.getLeftY(), m_controller.getRightX()*6);
-
+  m_myRobot.arcadeDrive(m_controller.getLeftY(),m_controller.getRightX());
+  m_rearRobot.arcadeDrive(m_controller.getLeftY(), m_controller.getRightX());
 
   //this prints the positions of the motors in realtime
   SmartDashboard.putNumber("Left Encoder", leftEncoder.getPosition());
@@ -96,6 +107,53 @@ private final XboxController m_controller = new XboxController(0);
   SmartDashboard.putNumber(   "IMU_Yaw",              ahrs.getYaw());
   SmartDashboard.putNumber(   "IMU_Pitch",            ahrs.getPitch());
   SmartDashboard.putNumber(   "IMU_Roll",             ahrs.getRoll());
+
+    if(m_controller.getRightTriggerAxis() > 0.1){
+
+     
+      System.out.println("X pressed");
+
+      if(firing == 0){
+        launchWheel.set(1);
+        Timer.delay(.25);
+         feedWheel.set(1);
+         firing = 1;
+         Timer.delay(.5);
+         launchWheel.set(0);
+         feedWheel.set(0);
+         firing = 0;
+     
+    }
+  }
+    if(m_controller.getLeftTriggerAxis() > 0.1){
+
+     
+      System.out.println("A pressed");
+
+      if(loading == 0){
+        launchWheel.set(-.2);
+         feedWheel.set(-.2);
+         firing = 0;
+         loading = 1;
+        Timer.delay(.25);
+     launchWheel.set(0);
+     feedWheel.set(0);
+        loading = 0;
+      }
+    }
+  
+    /** 
+    if(m_Timer.get() < 2.0){
+      launchWheel.set(0.9);
+    }else if(m_Timer.get() < 4.0){
+      launchWheel.set(0.9);
+      feedWheel.set(0.9);
+    }else{
+      launchWheel.set(0.0);
+      feedWheel.set(0.0);
+    }
+*/
+
   }
 
 
