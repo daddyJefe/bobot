@@ -3,10 +3,17 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
+
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.math.trajectory.TrajectoryUtil;
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -15,6 +22,10 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
  //private final XboxController m_controller = new XboxController(0);  
 import com.revrobotics.CANSparkMax;
@@ -32,8 +43,20 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
  * the package after creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class Robot extends TimedRobot {
 
+
+
+  /**
+   * Imports a Trajectory from a JSON file exported from PathWeaver.
+   *
+   * @param path The path of the json file to import from
+   * @return The trajectory represented by the file.
+   * @throws IOException if reading from the file fails.
+   */
+
+ 
+
+public class Robot extends TimedRobot {
            
            AHRS ahrs = new AHRS(SPI.Port.kMXP);
        
@@ -41,26 +64,47 @@ public class Robot extends TimedRobot {
    
   private DifferentialDrive m_myRobot;
   //secondary differentialDrive created to drive the rear wheel systems
- private DifferentialDrive m_rearRobot;
-
+  private DifferentialDrive m_rearRobot;
+private Command autonomousCommand;
   private CANSparkMax m_leftMotor;
   private CANSparkMax m_rightMotor;
-int firing = 0;
-int loading = 0;
-private CANSparkMax m_leftRearMotor;
+  int firing = 0;
+  int loading = 0;
+  private CANSparkMax m_leftRearMotor;
   private CANSparkMax m_rightRearMotor;
 
-//declaring motor encoders for data feedback!
-private RelativeEncoder leftEncoder;
-private RelativeEncoder rightEncoder;
+  //declaring motor encoders for data feedback!
+  private RelativeEncoder leftEncoder;
+  private RelativeEncoder rightEncoder;
 
-private CANSparkMax feedWheel;
-private CANSparkMax launchWheel;
-private final Timer m_Timer = new Timer();
+  private CANSparkMax feedWheel;
+  private CANSparkMax launchWheel;
+  private final Timer m_Timer = new Timer();
 
 private final XboxController m_controller = new XboxController(0);  
+
+//Autonomous Mode Code
+private static final String testAuto ="testAuto";
+private static final String testAuto2 = "testAuto2";
+private String m_AutoSelected;
+private final SendableChooser<String> m_Chooser = new SendableChooser<>();
+
+
   @Override
   public void robotInit() {
+
+
+
+    CameraServer.addServer("cam 1");
+     CameraServer.addServer("cam 2");
+    UsbCamera camera = CameraServer.startAutomaticCapture();
+   
+              // Set the resolution
+              camera.setResolution(160, 120);
+
+     UsbCamera camera2 = CameraServer.startAutomaticCapture();
+
+              camera2.setResolution(160, 120);
   /**
    * SPARK MAX controllers are intialized over CAN by constructing a CANSparkMax object
    * 
@@ -92,12 +136,27 @@ private final XboxController m_controller = new XboxController(0);
     //this code sets up the encoders with their respective motors
     leftEncoder = m_leftRearMotor.getEncoder();
     rightEncoder = m_rightRearMotor.getEncoder();
+
+    //Autonomous Mode Code
+    m_Chooser.setDefaultOption("Default Test Auto", testAuto);
+    m_Chooser.addOption("Option 2 Test", testAuto2);
+    SmartDashboard.putData("Auto Choices", m_Chooser);
+    
+    
   }
 
   @Override
   public void teleopPeriodic() {
-  m_myRobot.arcadeDrive(m_controller.getLeftY(),m_controller.getRightX());
-  m_rearRobot.arcadeDrive(m_controller.getLeftY(), m_controller.getRightX());
+    
+//do camera streaming
+//CameraServer.startAutomaticCapture();
+
+
+
+
+
+  m_myRobot.arcadeDrive(m_controller.getLeftY()*0.5,m_controller.getRightX()*0.25);
+  m_rearRobot.arcadeDrive(m_controller.getLeftY()*0.5, m_controller.getRightX()*0.25);
 
   //this prints the positions of the motors in realtime
   SmartDashboard.putNumber("Left Encoder", leftEncoder.getPosition());
@@ -166,5 +225,27 @@ public void disabledPeriodic() {
 public void robotPeriodic() {
   
 }
+
+@Override
+public void autonomousInit() {
+m_AutoSelected = m_Chooser.getSelected();
+
+
+}
+
+@Override
+public void autonomousPeriodic(){
+  switch(m_AutoSelected){
+    case testAuto2:
+    //custom code goes here
+    case testAuto:
+    default:
+    //Put default code here
+    break;
+  }
+
+
+}
+
 }
 
