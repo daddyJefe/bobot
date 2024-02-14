@@ -5,7 +5,7 @@
 package frc.robot;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
-
+import edu.wpi.first.wpilibj.RobotController;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 import edu.wpi.first.math.filter.LinearFilter;
@@ -26,7 +26,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-
+import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.DigitalOutput;
  //private final XboxController m_controller = new XboxController(0);  
 import com.revrobotics.CANSparkMax;
 
@@ -58,6 +59,17 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 
 public class Robot extends TimedRobot {
            
+
+  public DigitalOutput ultrasonicTriggerPinOne = new DigitalOutput(0);
+  public AnalogInput ultrasonicSensorOne = new AnalogInput(0);
+
+  public double ultrasonicSensorOneRange = 0;
+  public double voltageScaleFactor = 1;
+
+  public void turnOnSensorOne(){
+    ultrasonicTriggerPinOne.set(true);
+  }
+
            AHRS ahrs = new AHRS(SPI.Port.kMXP);
        
 
@@ -93,7 +105,7 @@ private final SendableChooser<String> m_Chooser = new SendableChooser<>();
   @Override
   public void robotInit() {
 
-
+    SmartDashboard.putNumber("Sensor 1 Range", 500);
 
     CameraServer.addServer("cam 1");
      CameraServer.addServer("cam 2");
@@ -223,7 +235,9 @@ public void disabledPeriodic() {
 
 @Override
 public void robotPeriodic() {
-  
+   ultrasonicSensorOneRange = (ultrasonicSensorOne.getValue()*voltageScaleFactor*0.125);
+  SmartDashboard.putNumber("Sensor 1 Range", ultrasonicSensorOneRange);
+  voltageScaleFactor = 5/RobotController.getVoltage5V();
 }
 
 @Override
@@ -235,6 +249,9 @@ m_AutoSelected = m_Chooser.getSelected();
 
 @Override
 public void autonomousPeriodic(){
+
+ 
+
   switch(m_AutoSelected){
     case testAuto2:
     //custom code goes here
