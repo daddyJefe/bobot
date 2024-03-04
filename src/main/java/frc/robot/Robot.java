@@ -100,6 +100,7 @@ private static final String testAuto ="testAuto";
 private static final String testAuto2 = "testAuto2";
 private String m_AutoSelected;
 private final SendableChooser<String> m_Chooser = new SendableChooser<>();
+private int m_count;
 
 
   @Override
@@ -167,8 +168,8 @@ private final SendableChooser<String> m_Chooser = new SendableChooser<>();
 
 
 
-  m_myRobot.arcadeDrive(m_controller.getLeftY()*0.5,m_controller.getRightX()*0.25);
-  m_rearRobot.arcadeDrive(m_controller.getLeftY()*0.5, m_controller.getRightX()*0.25);
+  m_myRobot.arcadeDrive(m_controller.getLeftY()*.85,m_controller.getRightX()*.5);
+  m_rearRobot.arcadeDrive(m_controller.getLeftY()*.85, m_controller.getRightX()*.5);
 
   //this prints the positions of the motors in realtime
   SmartDashboard.putNumber("Left Encoder", leftEncoder.getPosition());
@@ -182,14 +183,14 @@ private final SendableChooser<String> m_Chooser = new SendableChooser<>();
     if(m_controller.getRightTriggerAxis() > 0.1){
 
      
-      System.out.println("X pressed");
+
 
       if(firing == 0){
         launchWheel.set(1);
-        Timer.delay(.25);
+        Timer.delay(.4);
          feedWheel.set(1);
          firing = 1;
-         Timer.delay(.5);
+         Timer.delay(1);
          launchWheel.set(0);
          feedWheel.set(0);
          firing = 0;
@@ -199,14 +200,14 @@ private final SendableChooser<String> m_Chooser = new SendableChooser<>();
     if(m_controller.getLeftTriggerAxis() > 0.1){
 
      
-      System.out.println("A pressed");
+
 
       if(loading == 0){
         launchWheel.set(-.2);
          feedWheel.set(-.2);
          firing = 0;
          loading = 1;
-        Timer.delay(.25);
+        Timer.delay(.4);
      launchWheel.set(0);
      feedWheel.set(0);
         loading = 0;
@@ -243,14 +244,25 @@ public void robotPeriodic() {
 @Override
 public void autonomousInit() {
 m_AutoSelected = m_Chooser.getSelected();
-
-
+m_count = 0;
 }
 
 @Override
 public void autonomousPeriodic(){
+  
+m_leftRearMotor.set(.5);
+m_rightRearMotor.set(.5);
+m_leftMotor.set(.5);
+m_rightMotor.set(.5);
+// Timer.delay(3);
 
- 
+if(m_count > 100){
+m_leftRearMotor.set(0);
+m_rightRearMotor.set(0);
+m_leftMotor.set(0);
+m_rightMotor.set(0);
+}
+m_count++;
 
   switch(m_AutoSelected){
     case testAuto2:
