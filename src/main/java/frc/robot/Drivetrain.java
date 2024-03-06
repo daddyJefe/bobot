@@ -13,6 +13,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.math.kinematics.Odometry;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.SPI;
@@ -24,7 +25,7 @@ import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 /** Represents a differential drive style drivetrain. */
 public class Drivetrain {
-
+  
   public static final double kMaxSpeed = 3.0; // meters per second
   public static final double kMaxAngularSpeed = 2 * Math.PI; // one rotation per second
 
@@ -79,7 +80,7 @@ public class Drivetrain {
     m_odometry =
         new DifferentialDriveOdometry(
             ahrs.getRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition(), 
-            new Pose2d(5.0, 13.5, new Rotation2d()));
+            new Pose2d(0.0, 0.0, new Rotation2d()));
   }
 
   /**
@@ -124,9 +125,36 @@ public class Drivetrain {
         ahrs.getRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
   }
 
-  public void printOdemetry(){
-    System.out.println(m_odometry.getPoseMeters());
+  
+  
+  public double getDirection(double x,double y) {
+    // Calculate the angle between the two points
+    Pose2d odo2 = m_odometry.getPoseMeters();
+    updateOdometry();
+    odo2 = m_odometry.getPoseMeters();
+    double angle = Math.atan2(odo2.getY() - y,-1*odo2.getX() - x) * (180 / Math.PI);
+
+    // Normalize the angle to be between 0 and 360 degrees
+    if (angle < 0) {
+        angle += 360;
+    }
+    //return odo2.getY();
+    return angle;
+}
+
+public boolean pointRange(double x, double y){
+   updateOdometry();
+   Pose2d odo3 = m_odometry.getPoseMeters();
+    odo3 = m_odometry.getPoseMeters();
+    System.out.println("targeting point " + x + " " + y + "now, I am at" + odo3.getX() + ", " + odo3.getY());
+    System.out.println(odo3.getY());
+  if(Math.abs(odo3.getY()-y)<.1 && Math.abs(odo3.getX()-x)<.1){
+    return false;
   }
+  return true;
+}
+
+
 
   
 

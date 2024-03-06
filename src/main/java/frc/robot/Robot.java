@@ -7,6 +7,7 @@ package frc.robot;
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
@@ -27,9 +28,63 @@ public class Robot extends TimedRobot {
   }
   @Override
   public void autonomousPeriodic() {
-    teleopPeriodic();
     m_drive.updateOdometry();
+    float roboDirection = ahrs.getYaw();
+
+  roboDirection += 180;
+
+  
+
+    m_drive.getDirection(2, 0);
+    
+      /*
+       *if(roboDirection > m_drive.getDirection(0,0)){
+      System.out.println("turn right");
+      m_drive.doArcadeDrive(0, -.3);
+    }else{
+      m_drive.doArcadeDrive(0, .3);
+      System.out.println("print left");
+    } 
+       * 
+       * 
+       * 
+       * 
+       * 
+       * 
+       * 
+       */
+      //System.out.println((m_drive.getDirection(2, 0)-roboDirection)*.1/100);
+      
+    if(degreesToTurn(ahrs.getYaw(), m_drive.getDirection(2,0)) > 2){
+      m_drive.doArcadeDrive(0, .3);
+   
+    }else if(degreesToTurn(ahrs.getYaw(), m_drive.getDirection(2,0)) < -2){
+      m_drive.doArcadeDrive(0, -.3);
+    }else{
+      //m_drive.doArcadeDrive(0, degreesToTurn(ahrs.getYaw(), m_drive.getDirection(2,0))/360);
+      if(m_drive.pointRange(2, 0)){
+       m_drive.doArcadeDrive(-.3, 0);
+      }
+    }
+
+
+    m_drive.pointRange(2,0);
   }
+
+  public double degreesToTurn(double x, double y) {
+    // Calculate the difference between the two directions
+    x = x + 180;
+    double turn = y - x;
+
+    // Normalize the turn to be between -180 and 180 degrees
+
+    System.out.println(turn);
+    if(turn< 10 && turn > -10){
+      turn = 0;
+    }
+    return turn;
+    
+}
 
   @Override
   public void teleopPeriodic() {
@@ -45,10 +100,11 @@ public class Robot extends TimedRobot {
     // the right by default.
     final var rot = -m_rotLimiter.calculate(m_controller.getRightX()) * Drivetrain.kMaxAngularSpeed;
 
-    m_drive.drive(xSpeed, rot);
+   
+
     
-m_drive.updateOdometry();
-m_drive.printOdemetry();
+
+   System.out.println(m_drive.getDirection(.5, .5));
   }
 
   public void robotPeriodic(){
