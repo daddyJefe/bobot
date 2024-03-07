@@ -146,12 +146,14 @@ public boolean pointRange(double x, double y){
    updateOdometry();
    Pose2d odo3 = m_odometry.getPoseMeters();
     odo3 = m_odometry.getPoseMeters();
-    System.out.println("targeting point " + x + " " + y + "now, I am at" + odo3.getX() + ", " + odo3.getY());
-    System.out.println(odo3.getY());
-  if(Math.abs(odo3.getY()-y)<.1 && Math.abs(odo3.getX()-x)<.1){
+  if(Math.abs(odo3.getY()-y)<1 && Math.abs(odo3.getX()-x)<1){
+    
     return false;
   }
+  //System.out.print(Math.abs(odo3.getY()-y));
+  System.out.println(Math.abs(odo3.getX()-x));
   return true;
+  
 }
 
 
